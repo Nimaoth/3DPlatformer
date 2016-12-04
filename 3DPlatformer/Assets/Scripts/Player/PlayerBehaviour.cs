@@ -4,10 +4,29 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerBehaviour : MonoBehaviour
 {
+    [System.Serializable]
+    public class MoveSettings
+    {
+        public float RunVelocity = 12;
+        public float RotateVelocity = 100;
+        public float JumpVelocity = 8;
+        public float DistanceToGround = 1.3f;
+        public LayerMask Ground;
+    }
+
+    [System.Serializable]
+    public class InputSettings
+    {
+        public string FORWARD_AXIS = "Vertical";
+        public string SIDEWAYS_AXIS = "Horizontal";
+        public string TURN_AXIS = "Mouse X";
+        public string JUMP_AXIS = "Jump";
+    }
+
     #region Public Variables
 
-    public MoveSettings MoveSettings;
-    public InputSettings InputSettings;
+    public MoveSettings moveSettings;
+    public InputSettings inputSettings;
 
     #endregion
 
@@ -35,6 +54,26 @@ public class PlayerBehaviour : MonoBehaviour
     {
         GetInput();
         Turn();
+
+        Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        float t = (transform.position.y - camRay.origin.y) / camRay.direction.y;
+        Vector3 lookAt = camRay.GetPoint(t);
+        //transform.LookAt(lookAt);
+
+        //RaycastHit hitInfo;
+        //if (Physics.Raycast(camRay, out hitInfo, float.MaxValue, LayerMask.GetMask("PlayerMoveDirection")))
+        //{
+        //    transform.LookAt(new Vector3(hitInfo.point.x, transform.position.y, hitInfo.point.z));
+        //}
+
+        /*
+
+        oy + t * dy = ty
+        t * dy = ty - oy
+        t = (ty - oy) / dy
+
+        */
     }
 
     void FixedUpdate()
@@ -45,32 +84,35 @@ public class PlayerBehaviour : MonoBehaviour
 
     void GetInput()
     {
-        if (InputSettings.FORWARD_AXIS.Length != 0)
-            forwardInput = Input.GetAxis(InputSettings.FORWARD_AXIS);
+        if (inputSettings.FORWARD_AXIS.Length != 0)
+            forwardInput = Input.GetAxis(inputSettings.FORWARD_AXIS);
 
-        if (InputSettings.SIDEWAYS_AXIS.Length != 0)
-            sidewaysInput = Input.GetAxis(InputSettings.SIDEWAYS_AXIS);
+        if (inputSettings.SIDEWAYS_AXIS.Length != 0)
+            sidewaysInput = Input.GetAxis(inputSettings.SIDEWAYS_AXIS);
 
-        if (InputSettings.TURN_AXIS.Length != 0)
-            turnInput = Input.GetAxis(InputSettings.TURN_AXIS);
+        if (inputSettings.TURN_AXIS.Length != 0)
+            turnInput = Input.GetAxis(inputSettings.TURN_AXIS);
 
-        if (InputSettings.JUMP_AXIS.Length != 0)
-            jumpInput = (int) Input.GetAxisRaw(InputSettings.JUMP_AXIS);
+        if (inputSettings.JUMP_AXIS.Length != 0)
+            jumpInput = (int) Input.GetAxisRaw(inputSettings.JUMP_AXIS);
     }
 
     void Run()
-    {
-        velocity.z = forwardInput * MoveSettings.RunVelocity;
-        velocity.x = sidewaysInput * MoveSettings.RunVelocity;
+    {                
+        velocity.z = forwardInput * moveSettings.RunVelocity;
+        velocity.x = sidewaysInput * moveSettings.RunVelocity;
         velocity.y = playerRigidbody.velocity.y;
-        playerRigidbody.velocity = transform.TransformDirection(velocity);
+
+        velocity = transform.TransformDirection(velocity);
+
+        playerRigidbody.velocity = velocity;
     }
 
     void Turn()
     {
         if (Mathf.Abs(turnInput) > 0)
         {
-            targetRotation *= Quaternion.AngleAxis(MoveSettings.RotateVelocity * turnInput * Time.deltaTime, Vector3.up);
+            targetRotation *= Quaternion.AngleAxis(moveSettings.RotateVelocity * turnInput * Time.deltaTime, Vector3.up);
         }
         transform.rotation = targetRotation;
     }
@@ -79,18 +121,13 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (jumpInput != 0 && Grounded())
         {
-            playerRigidbody.velocity = new Vector3(playerRigidbody.velocity.x, MoveSettings.JumpVelocity,
+            playerRigidbody.velocity = new Vector3(playerRigidbody.velocity.x, moveSettings.JumpVelocity,
                 playerRigidbody.velocity.z);
         }
     }
 
     bool Grounded()
     {
-        return Physics.Raycast(transform.position, Vector3.down, MoveSettings.DistanceToGround, MoveSettings.Ground);
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(transform.position, transform.position + new Vector3(0, -MoveSettings.DistanceToGround, 0));
+        return Physics.Raycast(transform.position, Vector3.down, moveSettings.DistanceToGround, moveSettings.Ground);
     }
 }
