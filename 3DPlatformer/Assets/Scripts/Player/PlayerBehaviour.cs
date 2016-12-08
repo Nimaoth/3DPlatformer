@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerBehaviour : MonoBehaviour
@@ -27,6 +28,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public MoveSettings moveSettings;
     public InputSettings inputSettings;
+    public Transform SpawnPoint;
 
     #endregion
 
@@ -44,6 +46,9 @@ public class PlayerBehaviour : MonoBehaviour
 
     void Awake()
     {
+        transform.position = SpawnPoint.position;
+        transform.rotation = SpawnPoint.rotation;
+
         velocity = Vector3.zero;
         forwardInput = sidewaysInput = turnInput = jumpInput = 0;
         targetRotation = transform.rotation;
@@ -54,26 +59,6 @@ public class PlayerBehaviour : MonoBehaviour
     {
         GetInput();
         Turn();
-
-        Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        float t = (transform.position.y - camRay.origin.y) / camRay.direction.y;
-        Vector3 lookAt = camRay.GetPoint(t);
-        //transform.LookAt(lookAt);
-
-        //RaycastHit hitInfo;
-        //if (Physics.Raycast(camRay, out hitInfo, float.MaxValue, LayerMask.GetMask("PlayerMoveDirection")))
-        //{
-        //    transform.LookAt(new Vector3(hitInfo.point.x, transform.position.y, hitInfo.point.z));
-        //}
-
-        /*
-
-        oy + t * dy = ty
-        t * dy = ty - oy
-        t = (ty - oy) / dy
-
-        */
     }
 
     void FixedUpdate()
@@ -129,5 +114,18 @@ public class PlayerBehaviour : MonoBehaviour
     bool Grounded()
     {
         return Physics.Raycast(transform.position, Vector3.down, moveSettings.DistanceToGround, moveSettings.Ground);
+    }
+
+    void Spawn()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    void OnTriggerEnter(Collider c)
+    {
+        if (c.tag == "Deathzone")
+        {
+            Spawn();
+        }
     }
 }

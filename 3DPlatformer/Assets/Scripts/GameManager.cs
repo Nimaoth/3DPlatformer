@@ -14,7 +14,5 @@ public class GameManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (PlayerTransform.position.y < -10)
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 	}
 }
