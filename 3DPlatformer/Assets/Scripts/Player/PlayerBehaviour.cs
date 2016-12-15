@@ -119,10 +119,18 @@ public class PlayerBehaviour : MonoBehaviour
     void Spawn()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        GameData.Instance.Score = 0;
+        GameData.Instance.Lives = 3;
     }
 
     void OnDeath()
     {
+        if (GameData.Instance.Lives > 0)
+        {
+            GameData.Instance.Lives--;
+            return;
+        }
+
         Spawn();
     }
 
@@ -153,6 +161,7 @@ public class PlayerBehaviour : MonoBehaviour
             }
             else if (mycol.bounds.center.y - mycol.bounds.extents.y > col.bounds.center.y + 0.5f * col.bounds.extents.y)
             {
+                GameData.Instance.Score++;
                 JumpedOnEnemy(enemy.BumpSpeed);
                 enemy.OnDeath();
             }
