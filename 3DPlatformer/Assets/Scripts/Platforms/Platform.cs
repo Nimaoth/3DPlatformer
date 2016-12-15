@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Platform : MonoBehaviour {
 
-    public void OnCollisionEnter(Collision c)
+    public virtual void OnCollisionEnter(Collision c)
     {
         if (c.transform.tag == "Player")
         {
@@ -11,7 +11,7 @@ public class Platform : MonoBehaviour {
         }
     }
 
-    public void OnCollisionExit(Collision c)
+    public virtual void OnCollisionExit(Collision c)
     {
         if (c.transform.tag == "Player")
         {

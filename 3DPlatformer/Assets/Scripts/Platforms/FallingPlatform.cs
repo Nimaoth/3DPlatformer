@@ -15,11 +15,11 @@ public class FallingPlatform : Platform
         velocity = Vector3.zero;
     }
 
-    new void OnCollisionEnter(Collision c)
+    public override void OnCollisionEnter(Collision c)
     {
-        base.OnCollisionEnter(c);
         if (c.transform.tag == "Player")
         {
+            c.transform.parent = transform;
             StartCoroutine(Fall());
         }
     }

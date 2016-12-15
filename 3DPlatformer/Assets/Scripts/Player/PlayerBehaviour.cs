@@ -121,11 +121,45 @@ public class PlayerBehaviour : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    void OnDeath()
+    {
+        Spawn();
+    }
+
     void OnTriggerEnter(Collider c)
     {
         if (c.tag == "Deathzone")
         {
-            Spawn();
+            OnDeath();
+        }
+    }
+
+    void JumpedOnEnemy(float f)
+    {
+        playerRigidbody.AddForce(Vector3.up * f, ForceMode.Impulse);
+    }
+
+    void OnCollisionEnter(Collision c)
+    {
+        if (c.gameObject.tag == "Enemy")
+        {
+            Enemy enemy = c.gameObject.GetComponent<Enemy>();
+            Collider col = c.gameObject.GetComponent<Collider>();
+            Collider mycol = this.gameObject.GetComponent<Collider>();
+
+            if (enemy.Invincible)
+            {
+                OnDeath();
+            }
+            else if (mycol.bounds.center.y - mycol.bounds.extents.y > col.bounds.center.y + 0.5f * col.bounds.extents.y)
+            {
+                JumpedOnEnemy(enemy.BumpSpeed);
+                enemy.OnDeath();
+            }
+            else
+            {
+                OnDeath();
+            }
         }
     }
 }
