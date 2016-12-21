@@ -21,6 +21,11 @@ public class GameManager : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
-	}
+	void Update ()
+	{
+	    if (Input.GetButtonDown("TimeControl"))
+	        GameData.Instance.Paused = true;
+        if (Input.GetButtonUp("TimeControl"))
+            GameData.Instance.Paused = false;
+    }
 }

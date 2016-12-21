@@ -15,6 +15,8 @@ public class MovingPlatformEditor : Editor {
     public SerializedProperty transformAProp;
     public SerializedProperty transformBProp;
 
+    public SerializedProperty platformParentProp;
+
     void OnEnable()
     {
         stateProp = serializedObject.FindProperty("Type");
@@ -26,6 +28,8 @@ public class MovingPlatformEditor : Editor {
 
         transformAProp = serializedObject.FindProperty("TransformA");
         transformBProp = serializedObject.FindProperty("TransformB");
+
+        platformParentProp = serializedObject.FindProperty("PlatformParent");
     }
 
     public override void OnInspectorGUI()
@@ -34,6 +38,7 @@ public class MovingPlatformEditor : Editor {
 
         EditorGUILayout.PropertyField(smoothProp);
         EditorGUILayout.PropertyField(speedProp);
+        EditorGUILayout.PropertyField(platformParentProp);
         EditorGUILayout.PropertyField(stateProp);
 
         MovingPlatform.PositionType pt = (MovingPlatform.PositionType)stateProp.enumValueIndex;

@@ -15,8 +15,11 @@ public class MovingPlatform : Platform {
     public Transform TransformA;
     public Transform TransformB;
 
+    public Transform PlatformParent;
+
     private float direction;
     private float position;
+
 
     void Start()
     {
@@ -27,6 +30,9 @@ public class MovingPlatform : Platform {
         }
 
         direction = 1;
+
+        if (!PlatformParent)
+            PlatformParent = transform;
     }
 	
 	// Update is called once per frame
@@ -38,11 +44,11 @@ public class MovingPlatform : Platform {
         {
             case PositionType.Vector:
                 distance = (PointB - PointA).magnitude;
-                transform.position = Lerp(PointA, PointB, position / distance, Smooth);
+                PlatformParent.position = Lerp(PointA, PointB, position / distance, Smooth);
                 break;
             case PositionType.Transform:
                 distance = (TransformA.position - TransformB.position).magnitude;
-                transform.position = Lerp(TransformA.position, TransformB.position, position / distance, Smooth);
+                PlatformParent.position = Lerp(TransformA.position, TransformB.position, position / distance, Smooth);
                 break;
         }
 
@@ -67,5 +73,11 @@ public class MovingPlatform : Platform {
         return Vector3.Lerp(a, b, f);
     }
 
-    
+    public override void OnCollisionEnter(Collision c)
+    {
+        if (c.transform.tag == "Player")
+        {
+            c.transform.parent = PlatformParent;
+        }
+    }
 }

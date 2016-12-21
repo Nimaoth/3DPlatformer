@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerBehaviour : MonoBehaviour
+public class PlayerBehaviour : MonoBehaviour, TRInterface
 {
     [System.Serializable]
     public class MoveSettings
@@ -42,6 +42,8 @@ public class PlayerBehaviour : MonoBehaviour
     private float turnInput;
     private int jumpInput;
 
+    private TimeReverse timeReverse;
+
     #endregion
 
     void Awake()
@@ -55,16 +57,30 @@ public class PlayerBehaviour : MonoBehaviour
         playerRigidbody = gameObject.GetComponent<Rigidbody>();
     }
 
+    void Start()
+    {
+        timeReverse = GetComponent<TimeReverse>();
+    }
+
     void Update()
     {
+        if (GameData.Instance.Paused && timeReverse != null)
+            return;
+
         GetInput();
         Turn();
     }
 
     void FixedUpdate()
     {
-        Run();
-        Jump();
+        if (GameData.Instance.Paused && timeReverse != null)
+            return;
+
+        if (!playerRigidbody.isKinematic)
+        {
+            Run();
+            Jump();
+        }
     }
 
     void GetInput()
@@ -170,5 +186,32 @@ public class PlayerBehaviour : MonoBehaviour
                 OnDeath();
             }
         }
+    }
+
+    public void SaveTRObject()
+    {
+        timeReverse.PushTRObject(new Status
+        {
+            position = transform.position,
+            rotation = transform.rotation
+        });
+
+        playerRigidbody.isKinematic = false;
+    }
+
+    public void LoadTROBject(TRObject trObject)
+    {
+        Status status = trObject as Status;
+        transform.position = status.position;
+        transform.rotation = status.rotation;
+
+
+        playerRigidbody.isKinematic = true;
+    }
+
+    private class Status : TRObject
+    {
+        public Quaternion rotation;
+        public Vector3 position;
     }
 }
