@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
-public class Collectable : MonoBehaviour {
+public class Collectable : MonoBehaviour, TRInterface
+{
 
     public float RotationSpeed = 30;
     public float WaveSpeed = 1;
@@ -12,14 +14,26 @@ public class Collectable : MonoBehaviour {
     private Vector3 startPosition;
 
     private bool moving;
+    private TimeReverse timeReverse;
+
+    private new Collider collider;
+    private new Renderer renderer;
 
     void Start()
     {
         startPosition = transform.position;
         moving = true;
+
+        timeReverse = GetComponent<TimeReverse>();
+
+        collider = GetComponent<Collider>();
+        renderer = GetComponent<Renderer>();
     }
 
 	void Update() {
+        if (GameData.Instance.Paused && timeReverse != null)
+            return;
+
         if (moving)
         {
             transform.position = startPosition + Vector3.up * WaveLength * Mathf.Sin(WaveSpeed * Time.time);
@@ -42,7 +56,10 @@ public class Collectable : MonoBehaviour {
             yield return null;
         }
 
-        Destroy(transform.parent.gameObject);
+        //Destroy(transform.parent.gameObject);
+        renderer.enabled = false;
+        collider.enabled = false;
+
         yield return null;
     }
 
@@ -52,5 +69,35 @@ public class Collectable : MonoBehaviour {
         {
             StartCoroutine(OnCollect());
         }
+    }
+
+    public void SaveTRObject()
+    {
+        timeReverse.PushTRObject(new Status
+        {
+            moving = this.moving,
+            position = transform.position,
+            rotation = transform.rotation,
+            enabled = collider.enabled
+        });
+    }
+
+    public void LoadTROBject(TRObject trObject)
+    {
+        Status status = trObject as Status;
+
+        this.moving = status.moving;
+        transform.position = status.position;
+        transform.rotation = status.rotation;
+        collider.enabled = status.enabled;
+        renderer.enabled = status.enabled;
+    }
+
+    private class Status : TRObject
+    {
+        public bool moving;
+        public Vector3 position;
+        public Quaternion rotation;
+        public bool enabled;
     }
 }

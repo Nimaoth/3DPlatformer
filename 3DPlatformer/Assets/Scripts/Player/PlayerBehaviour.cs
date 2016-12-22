@@ -193,7 +193,8 @@ public class PlayerBehaviour : MonoBehaviour, TRInterface
         timeReverse.PushTRObject(new Status
         {
             position = transform.position,
-            rotation = transform.rotation
+            rotation = transform.rotation,
+            targetRotation = this.targetRotation
         });
 
         playerRigidbody.isKinematic = false;
@@ -204,7 +205,7 @@ public class PlayerBehaviour : MonoBehaviour, TRInterface
         Status status = trObject as Status;
         transform.position = status.position;
         transform.rotation = status.rotation;
-
+        targetRotation = status.targetRotation;
 
         playerRigidbody.isKinematic = true;
     }
@@ -212,6 +213,7 @@ public class PlayerBehaviour : MonoBehaviour, TRInterface
     private class Status : TRObject
     {
         public Quaternion rotation;
+        public Quaternion targetRotation;
         public Vector3 position;
     }
 }
